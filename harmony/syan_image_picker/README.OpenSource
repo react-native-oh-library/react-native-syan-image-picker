@@ -1,0 +1,11 @@
+[
+    {
+        "Name": "react-native-syan-image-picker",
+        "License": "MIT License",
+        "License File": "https://github.com/syanbo/react-native-syan-image-picker/blob/master/LICENSE",
+        "Version Number": "0.5.3",
+        "Owner" : "syan"
+        "Upstream URL": "https://github.com/syanbo/react-native-syan-image-picker",
+        "Description": "React-Native 多图片选择 支持裁剪 压缩."
+    }
+]
