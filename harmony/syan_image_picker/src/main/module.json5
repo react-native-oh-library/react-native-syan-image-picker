@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "syan_image_picker",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ]
+  }
+}

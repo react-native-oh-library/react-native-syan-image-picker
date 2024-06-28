@@ -1,18 +1,16 @@
 {
-  "name": "react-native-syan-image-picker",
-  "version": "0.5.3",
+  "name": "@react-native-oh-tpl/react-native-syan-image-picker",
+  "version": "0.5.3-0.0.1",
   "description": "React-Native 多图片选择 支持裁剪 压缩",
   "main": "src/index.js",
-  "types": "src/index.d.ts",
-  "source": "src/index",
   "files": [
     "src",
-    "ios",
-    "android",
     "RNSyanImagePicker.podspec",
     "LICENSE",
     "README.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "harmony",
+    "NativeSyanImagePicker.ts"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -32,7 +30,9 @@
   "license": "MIT",
   "devDependencies": {
     "@release-it/conventional-changelog": "^2.0.1",
-    "release-it": "^14.11.6"
+    "release-it": "^14.11.6",
+    "react":"18.2.0",
+    "react-native":"0.74.1"
   },
   "release-it": {
     "git": {
@@ -56,5 +56,19 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "react-native-syan-image-picker": "^0.5.3"
+  },
+  "harmony": {
+    "alias": "react-native-syan-image-picker",
+    "codegenConfig": {
+      "specPaths": [
+        "./"
+      ]
+    }
+  },
+  "overrides": {
+    "@react-native/codegen": "0.74.0"
   }
 }
