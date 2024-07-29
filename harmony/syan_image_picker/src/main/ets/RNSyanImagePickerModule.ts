@@ -74,7 +74,19 @@ export class RNSyanImagePickerTurboModule extends TurboModule implements TM.RNSy
       default:
         break;
     }
+    if (!!this.selectList && this.selectList.length > 0) {
+      let selectURI=[]
+      for (let i = 0; i < this.selectList.length; i++) {
+        if(imageOrVideo && this.isImage(this.selectList[i].original_uri)){
+          selectURI.push(this.selectList[i].original_uri)
+        }
 
+        if(!imageOrVideo && this.isVideo(this.selectList[i].original_uri)){
+          selectURI.push(this.selectList[i].original_uri)
+        }
+      }
+      optionsPassedToOHSelector.preselectedUris = selectURI
+    }
     return optionsPassedToOHSelector;
   }
 
@@ -340,7 +352,7 @@ export class RNSyanImagePickerTurboModule extends TurboModule implements TM.RNSy
       /**
        * Store the result of each selection at the end of the select list array
        */
-      this.selectList.push(...newResults);
+      this.selectList = newResults
       imagePickerResponseDataToClient.selectedPhoto = this.selectList;
     } catch (err) {
       imagePickerResponseDataToClient.errorMessage = `${err}`;
