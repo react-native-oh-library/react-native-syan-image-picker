@@ -1,7 +1,7 @@
 {
   "name": "@react-native-oh-tpl/react-native-syan-image-picker",
   "type": "module",
-  "version": "0.5.3-0.0.1",
+  "version": "0.5.3-0.0.2",
   "description": "React-Native 多图片选择 支持裁剪 压缩.",
   "main": "index.ets",
   "author": "",
