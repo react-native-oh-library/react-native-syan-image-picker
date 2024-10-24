@@ -13,7 +13,7 @@
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANT KIND, EXPRESS OR
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -22,5 +22,37 @@
  * SOFTWARE.
  */
 
-export * from "./ts"
-export { ImageCrop } from "./src/main/ets/pages/ImageCrop"
+export class RegionItem {
+  x: number;
+  y: number;
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+export class IconStatus {
+  normal: Resource;
+  chosen: Resource;
+  constructor(normal: Resource, chosen: Resource) {
+    this.normal = normal;
+    this.chosen = chosen;
+  }
+}
+
+export enum CropType {
+  ORIGINAL_IMAGE,
+  SQUARE,
+  BANNER,
+  RECTANGLE
+}
+
+export enum RotateType {
+  CLOCKWISE,
+  ANTI_CLOCK
+}
+
+export enum MainTabId {
+  CROP,
+  ROTATE
+}
