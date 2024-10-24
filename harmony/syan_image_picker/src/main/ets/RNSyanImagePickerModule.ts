@@ -23,8 +23,8 @@
  */
 
 import { TurboModule, TurboModuleContext } from '@rnoh/react-native-openharmony/ts';
-import { TM } from "@rnoh/react-native-openharmony/generated/ts"
-import { ImagePickerOption, ImagePickerResponseData, SelectedPhoto } from "./model/Model"
+import { TM } from '@rnoh/react-native-openharmony/generated/ts';
+import { ImagePickerOption, ImagePickerResponseData, SelectedPhoto } from './model/Model';
 import Logger from './Logger';
 import image from '@ohos.multimedia.image';
 import util from '@ohos.util';
@@ -32,9 +32,10 @@ import { BusinessError } from '@ohos.base';
 import fs from '@ohos.file.fs';
 import common from '@ohos.app.ability.common';
 import photoAccessHelper from '@ohos.file.photoAccessHelper';
-import { JSON, List } from '@kit.ArkTS';
+import { JSON } from '@kit.ArkTS';
 import { cameraPicker } from '@kit.CameraKit';
 import { media } from '@kit.MediaKit';
+import type Want from '@ohos.app.ability.Want';
 
 export class RNSyanImagePickerTurboModule extends TurboModule implements TM.RNSyanImagePicker.Spec {
   private static TAG: string = "[RNSyanImagePickerTurboModule.ts]";
@@ -57,19 +58,19 @@ export class RNSyanImagePickerTurboModule extends TurboModule implements TM.RNSy
   private buildSelectOption(options: ImagePickerOption, imageOrVideo: boolean): photoAccessHelper.PhotoSelectOptions {
     let optionsPassedToOHSelector: photoAccessHelper.PhotoSelectOptions = new photoAccessHelper.PhotoSelectOptions();
     const ONLY_ONE_NUMBER: number = 1;
-
     switch (imageOrVideo) {
       case true:
         optionsPassedToOHSelector.MIMEType = photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE;
         optionsPassedToOHSelector.maxSelectNumber = options.isCrop ? ONLY_ONE_NUMBER : options.imageCount;
         optionsPassedToOHSelector.isPhotoTakingSupported = options.isCamera;
         optionsPassedToOHSelector.isEditSupported = options.isCrop;
+        optionsPassedToOHSelector.isOriginalSupported=options.allowPickingOriginalPhoto;
         break;
-
       case false:
         optionsPassedToOHSelector.MIMEType = photoAccessHelper.PhotoViewMIMETypes.VIDEO_TYPE;
         optionsPassedToOHSelector.maxSelectNumber =
-          options.allowPickingMultipleVideo ? options.videoCount : ONLY_ONE_NUMBER;
+        options.allowPickingMultipleVideo ? options.videoCount : ONLY_ONE_NUMBER;
+        optionsPassedToOHSelector.isOriginalSupported=options.allowPickingOriginalPhoto;
         break;
       default:
         break;
@@ -410,7 +411,7 @@ export class RNSyanImagePickerTurboModule extends TurboModule implements TM.RNSy
     }
   }
 
-  private async pickCamera(cameraPickerModule, mContext, mediaType, pickerProfile) {
+  public  async pickCamera(cameraPickerModule, mContext, mediaType, pickerProfile) {
     try {
       const pickerResult = await cameraPickerModule.default.pick(mContext, mediaType, pickerProfile);
       return pickerResult;
@@ -431,7 +432,33 @@ export class RNSyanImagePickerTurboModule extends TurboModule implements TM.RNSy
         if (imagePickerResponseDataToClient.errorMessage) {
           callback(imagePickerResponseDataToClient.errorMessage, null);
         } else {
-          callback(null, imagePickerResponseDataToClient.selectedPhoto);
+          if (!options.allowPickingMultipleVideo) {
+            let bundleName=this.ctx.uiAbilityContext.abilityInfo.bundleName;
+            try {
+              let want: Want = {
+                "bundleName": bundleName,
+                "abilityName": "ImageCropAbility",
+              }
+              AppStorage.setOrCreate('filePath', imagePickerResponseDataToClient.selectedPhoto[0].original_uri);
+              AppStorage.setOrCreate('CropW', options.CropW);
+              AppStorage.setOrCreate('CropH', options.CropH);
+              AppStorage.setOrCreate('showCropCircle', options.showCropCircle);
+              AppStorage.setOrCreate('circleCropRadius', options.circleCropRadius);
+              this.ctx.uiAbilityContext.startAbilityForResult(want, (error, data) => {
+                  let imagePath = AppStorage.get('cropImagePath') as string;
+                  let  selectPhoto= new SelectedPhoto()
+                  selectPhoto.original_uri= imagePath
+                  selectPhoto.width=AppStorage.get('width') as number
+                  selectPhoto.height=AppStorage.get('height') as number
+                  selectPhoto.size=AppStorage.get('size') as number
+                  callback(null, [selectPhoto]);
+              });
+            } catch (err) {
+              console.info("crop image fail"+JSON.stringify(err))
+            }
+          }else {
+            callback(null, imagePickerResponseDataToClient.selectedPhoto);
+          }
         }
       })
       .catch((error) => {
@@ -441,10 +468,11 @@ export class RNSyanImagePickerTurboModule extends TurboModule implements TM.RNSy
       });
   }
 
+
+
   asyncShowImagePicker(options: ImagePickerOption): Promise<SelectedPhoto[]> {
     /*** Call the native image selector to obtain a set of URLs for the selected images**/
     const photoPicker = new photoAccessHelper.PhotoViewPicker();
-
     return photoPicker.select(this.buildSelectOption(options, true))
       .then((result: photoAccessHelper.PhotoSelectResult) => {
         return this.generateSelectedPhotoReturnedToTheClient(options, result.photoUris);
@@ -454,6 +482,7 @@ export class RNSyanImagePickerTurboModule extends TurboModule implements TM.RNSy
           return Promise.reject(new Error(imagePickerResponseDataToClient.errorMessage));
         }
 
+        console.info("test image :"+JSON.stringify(imagePickerResponseDataToClient.selectedPhoto))
         return imagePickerResponseDataToClient.selectedPhoto;
       })
       .catch((error) => {
@@ -481,7 +510,7 @@ export class RNSyanImagePickerTurboModule extends TurboModule implements TM.RNSy
         let mediaType: cameraPicker.PickerMediaType[] =
           [cameraPickerModule.default.PickerMediaType.PHOTO, cameraPickerModule.default.PickerMediaType.VIDEO];
         let mContext = this.ctx.uiAbilityContext;
-        let pickerProfile = { cameraPosition: cameraModule.default.CameraPosition.CAMERA_POSITION_UNSPECIFIED };
+        let pickerProfile = { cameraPosition: cameraModule.default.CameraPosition.CAMERA_POSITION_UNSPECIFIED,videoDuration: options.videoMaximumDuration};
         return this.pickCamera(cameraPickerModule, mContext, mediaType, pickerProfile);
       })
 
