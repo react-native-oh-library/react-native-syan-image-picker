@@ -432,7 +432,7 @@ export class RNSyanImagePickerTurboModule extends TurboModule implements TM.RNSy
         if (imagePickerResponseDataToClient.errorMessage) {
           callback(imagePickerResponseDataToClient.errorMessage, null);
         } else {
-          if (!options.allowPickingMultipleVideo) {
+          if (!options.allowPickingMultipleVideo && options.isCrop) {
             let bundleName=this.ctx.uiAbilityContext.abilityInfo.bundleName;
             try {
               let want: Want = {
